@@ -125,6 +125,8 @@ namespace UBS
                     return UBS.Styles.IconLinux;
                 case BuildTarget.StandaloneOSX:
                     return UBS.Styles.IconMacOs;
+                case BuildTarget.Switch:
+                    return UBS.Styles.IconSwitch;
                 default:
                     return new Texture2D(0, 0);
             }

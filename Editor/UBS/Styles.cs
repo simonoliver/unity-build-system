@@ -161,57 +161,24 @@ namespace UBS
 			}
 		}
 		static Texture2D _iconAndroid;
-		public static Texture2D IconAndroid
-		{
-			get
-			{
-				if (_iconAndroid == null)
-				{
-					_iconAndroid = (Texture2D)AssetDatabase.LoadAssetAtPath(Styles._imagePath + "icons/ico_android.png", typeof(Texture2D));
-					
-				}
-				return _iconAndroid;
-			}
-		}
+		public static Texture2D IconAndroid => _iconAndroid!=null ? _iconAndroid : _iconAndroid = (Texture2D)AssetDatabase.LoadAssetAtPath(_imagePath + "icons/ico_android.png", typeof(Texture2D));
+		
 		static Texture2D _iconWindows;
-		public static Texture2D IconWindows
-		{ 
-			get
-			{
-				if (_iconWindows == null)
-				{
-					_iconWindows = (Texture2D)AssetDatabase.LoadAssetAtPath(Styles._imagePath + "icons/ico_windows.png", typeof(Texture2D));
-					
-				}
-				return _iconWindows;
-			}
-		}
+		public static Texture2D IconWindows => _iconWindows!=null ? _iconWindows : _iconWindows = (Texture2D)AssetDatabase.LoadAssetAtPath(_imagePath + "icons/ico_windows.png", typeof(Texture2D));
+		
 		static Texture2D _iconLinux;
-		public static Texture2D IconLinux
-		{ 
-			get
-			{
-				if (_iconLinux == null)
-				{
-					_iconLinux = (Texture2D)AssetDatabase.LoadAssetAtPath(Styles._imagePath + "icons/ico_linux.png", typeof(Texture2D));
-					
-				}
-				return _iconLinux;
-			}
-		}
-		static Texture2D _iconMacOs;
-		public static Texture2D IconMacOs
-		{ 
-			get
-			{
-				if (_iconMacOs == null)
-				{
-					_iconMacOs = (Texture2D)AssetDatabase.LoadAssetAtPath(Styles._imagePath + "icons/ico_macos.png", typeof(Texture2D));
-					
-				}
-				return _iconMacOs;
-			}
-		}
+		public static Texture2D IconLinux => _iconLinux!=null ? _iconLinux : _iconLinux = (Texture2D)AssetDatabase.LoadAssetAtPath(_imagePath + "icons/ico_linux.png", typeof(Texture2D));
+
+		private static Texture2D _iconMacOs;
+		public static Texture2D IconMacOs=> _iconMacOs!=null ? _iconMacOs : _iconMacOs = (Texture2D)AssetDatabase.LoadAssetAtPath(_imagePath + "icons/ico_macos.png", typeof(Texture2D));
+		
+		private static Texture2D _iconSwitch;
+		public static Texture2D IconSwitch=> _iconSwitch!=null ? _iconSwitch : _iconSwitch = (Texture2D)AssetDatabase.LoadAssetAtPath(_imagePath + "icons/ico_switch.png", typeof(Texture2D));
+
+		
+		
+		
+		
 		static GUIStyle _icon;
 		public static GUIStyle Icon
 		{ 
