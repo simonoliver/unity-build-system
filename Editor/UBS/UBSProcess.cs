@@ -625,6 +625,21 @@ namespace UBS
 			}
 		}
 
+
+		public static DirectoryInfo GetOutputDirectory(BuildProcess process)
+		{
+			DirectoryInfo dir;
+			if(process.Platform == BuildTarget.Android
+			   || process.Platform == BuildTarget.StandaloneWindows
+			   || process.Platform == BuildTarget.StandaloneWindows64
+			   || process.Platform == BuildTarget.StandaloneLinux64
+			   || process.Platform == BuildTarget.Switch)
+				dir = new DirectoryInfo(Path.GetDirectoryName(UBS.Helpers.GetAbsolutePathRelativeToProject( process.OutputPath )));
+			else
+				dir = new DirectoryInfo(process.OutputPath);
+			return dir;
+		}
+		
 		bool CheckOutputPath(BuildProcess pProcess)
 		{
 			// We don't need an output path for a pretend build
@@ -641,15 +656,7 @@ namespace UBS
 			
 			try
 			{
-				DirectoryInfo dir;
-				if(pProcess.Platform == BuildTarget.Android
-				   || pProcess.Platform == BuildTarget.StandaloneWindows
-				   || pProcess.Platform == BuildTarget.StandaloneWindows64
-				   || pProcess.Platform == BuildTarget.StandaloneLinux64
-				   || pProcess.Platform == BuildTarget.Switch)
-					dir = new DirectoryInfo(Path.GetDirectoryName(UBS.Helpers.GetAbsolutePathRelativeToProject( pProcess.OutputPath )));
-				else
-					dir = new DirectoryInfo(pProcess.OutputPath);
+				var dir = GetOutputDirectory(pProcess);
 				dir.Create();
 
 				if(!dir.Exists)
