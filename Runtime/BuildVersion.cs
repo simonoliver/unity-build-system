@@ -8,6 +8,7 @@ using UnityEditor;
 
 namespace UBS
 {
+    [Serializable]
     public class BuildVersion
     {        
         public enum BuildType
@@ -27,6 +28,8 @@ namespace UBS
         public string tagName = "";
         public string buildTimestamp = "";
 
+        
+
         /// <summary>
         /// Increases the build revision. 
         /// </summary>
@@ -45,7 +48,7 @@ namespace UBS
             #endif
 
             var res = Resources.Load("buildVersion") as TextAsset;
-            return Serializer.Load<BuildVersion>(res.text);
+            return JsonUtility.FromJson<BuildVersion>(res.text);
         }
 
 		#if UNITY_EDITOR && !UNITY_WEBPLAYER
@@ -60,13 +63,13 @@ namespace UBS
             }
             content = File.ReadAllText(FileName);
 			
-            return Serializer.Load<BuildVersion>(content);
+            return JsonUtility.FromJson<BuildVersion>(content);
         }
 
         public void Save()
         {
-            // Save XML serialization
-            var content = Serializer.Save(this);
+            // Save JSON serialization
+            var content = JsonUtility.ToJson(this);
             FileInfo fi = new FileInfo(FileName);
             if(!fi.Directory.Exists)
             {
