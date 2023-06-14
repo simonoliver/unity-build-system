@@ -22,41 +22,43 @@ namespace UBS.Shared
 
         private BuildConfiguration m_BuildConfiguration;
         private double m_StartProcessTime;
-        private const float DELAY_FOR_PROCESS = 10;
+        // We need to wait a moment after build, or access to files won't be possible
+        private const float DELAY_FOR_PROCESS = 1;
+
+        private DirectoryInfo m_OutputDir;
+        private DirectoryInfo m_DebugInfoDir;
         
         public void BuildStepStart (BuildConfiguration configuration)
         {
             m_BuildConfiguration = configuration;
             m_StartProcessTime = EditorApplication.timeSinceStartup;
-        }
-
-        private void MoveTempFolders()
-        {
+            
             BuildTargetGroup btg = UBS.Helpers.GroupFromBuildTarget(m_BuildConfiguration.GetCurrentBuildProcess().Platform);
             var currentBuildProcess = m_BuildConfiguration.GetCurrentBuildProcess();
-            var outputDir = UBSProcess.GetOutputDirectory(currentBuildProcess);
+            m_OutputDir = UBSProcess.GetOutputDirectory(currentBuildProcess);
 
 
-            if (!outputDir.Exists)
+            if (!m_OutputDir.Exists)
             {
                 Debug.LogWarning("Output folder doesnt exist!");
+                mDone = true;
                 return;
             }
-
-            var debugInfoDirectoryName = $"{outputDir.Name}{DEBUG_OUTPUT_PREFIX}";
+            // Create target folder
+            var debugInfoDirectoryName = $"{m_OutputDir.Name}{DEBUG_OUTPUT_PREFIX}";
 
             EnumerationOptions enumerationOptions = new EnumerationOptions();
-            var debugInfoDirSearch = outputDir.Parent.GetDirectories(debugInfoDirectoryName, enumerationOptions);
+            var debugInfoDirSearch = m_OutputDir.Parent.GetDirectories(debugInfoDirectoryName, enumerationOptions);
 
             // If doesnt already exist, create
-            var debugInfoDir = debugInfoDirSearch.Length == 0
-                ? outputDir.Parent.CreateSubdirectory(debugInfoDirectoryName)
+            m_DebugInfoDir = debugInfoDirSearch.Length == 0
+                ? m_OutputDir.Parent.CreateSubdirectory(debugInfoDirectoryName)
                 : debugInfoDirSearch[0];
 
-            Debug.Log($"Target output dir {debugInfoDir}");
+            Debug.Log($"Target output dir {m_DebugInfoDir}");
             
             // Remove all folders from debugInfoDir
-            var existingDebugInfoDirectories = debugInfoDir.GetDirectories();
+            var existingDebugInfoDirectories = m_DebugInfoDir.GetDirectories();
             foreach (var existingDebugInfoDirectory in existingDebugInfoDirectories)
             {
                 try
@@ -69,9 +71,12 @@ namespace UBS.Shared
                     Debug.Log($"Cant delete existing debug info folder {existingDebugInfoDirectory.FullName} - {e}");
                 }
             }
-            
+        }
 
-            var allSubDirectories = outputDir.GetDirectories();
+        private bool MoveTempFolders()
+        {
+            
+            var allSubDirectories = m_OutputDir.GetDirectories();
             foreach (var subDirectory in allSubDirectories)
             {
                 bool move = false;
@@ -82,7 +87,7 @@ namespace UBS.Shared
 
                 if (move)
                 {
-                    var outputPath = $"{debugInfoDir.FullName}/{subDirectory.Name}";
+                    var outputPath = $"{m_DebugInfoDir.FullName}/{subDirectory.Name}";
                     Debug.Log($"Moving folder '{subDirectory.FullName}' to '{outputPath}'");
                     try
                     {
@@ -92,18 +97,31 @@ namespace UBS.Shared
                     catch (Exception e)
                     {
                         Debug.LogWarning($"Issue moving folder {e}");
+                        // We might have an issue moving, so will hold off as might have data acccess issues
+                        // (FIle still open)
+                        return false;
                     }
                 }
             }
+
+            return true;
         }
 
         public void BuildStepUpdate()
         {
-            Debug.Log($"Waiting {EditorApplication.timeSinceStartup}- {m_StartProcessTime + DELAY_FOR_PROCESS} ");
+            //Debug.Log($"Waiting {EditorApplication.timeSinceStartup}- {m_StartProcessTime + DELAY_FOR_PROCESS} ");
             if (EditorApplication.timeSinceStartup > (m_StartProcessTime + DELAY_FOR_PROCESS))
             {
-                MoveTempFolders();
-                mDone = true;
+                var success = MoveTempFolders();
+                if (success)
+                {
+                    mDone = true;
+                }
+                else
+                {
+                    // Delay again
+                    m_StartProcessTime += DELAY_FOR_PROCESS;
+                }
             }
         }
     
