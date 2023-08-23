@@ -360,6 +360,9 @@ namespace UBS
 				_editedBuildProcess.Name = EditorGUILayout.TextField("Name", _editedBuildProcess.Name);
 				_editedBuildProcess.Platform = (BuildTarget)EditorGUILayout.EnumPopup("Platform",
 					_editedBuildProcess.Platform);
+				
+				_editedBuildProcess.ProductNameOverride = EditorGUILayout.TextField("Product Name Override", _editedBuildProcess.ProductNameOverride);
+				
 				DrawOutputPathSelector();
 				_editedBuildProcess.UseEditorScenes = EditorGUILayout.Toggle(
 					new GUIContent("Use Scenes from Editor",

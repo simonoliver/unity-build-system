@@ -506,6 +506,7 @@ namespace UBS
 
 		void DoBuilding()
 		{
+            Debug.Log($"Dobuilding called {CurrentProcess.Name} target {CurrentProcess.OutputPath}");
             
 			BuildOptions bo = CurrentProcess.Options;
 			if(CurrentBuildConfiguration.GetCurrentBuildCollection().cleanBuild)
@@ -513,6 +514,9 @@ namespace UBS
 			
 			if (_buildAndRun)
 				bo |= BuildOptions.AutoRunPlayer;
+
+
+			
 
 			if (!CurrentProcess.Pretend)
 			{
@@ -538,6 +542,18 @@ namespace UBS
 					}
 				}
 
+				_collection.ActivateLogTypes();
+				
+				Debug.Log($"XXXX Building to path {CurrentProcess.OutputPath} - name {CurrentProcess.Name}");
+				// Cache prebuild product name in case of override
+				var preBuildProductName = PlayerSettings.productName;
+
+				// Allow override if string is not empty
+				if (!string.IsNullOrEmpty(CurrentProcess.ProductNameOverride))
+				{
+					PlayerSettings.productName = CurrentProcess.ProductNameOverride;
+				}
+
 				BuildPlayerOptions buildPlayerOptions = new BuildPlayerOptions
 				{
 					scenes = scenePaths.ToArray(),
@@ -547,8 +563,12 @@ namespace UBS
 					extraScriptingDefines = CurrentProcess.ScriptingDefines.ToArray()
 				};
 				BuildReport report = BuildPipeline.BuildPlayer(buildPlayerOptions);
-				_collection.ActivateLogTypes();
-				Debug.Log("Playerbuild Result: " + report.summary.result);
+				//_collection.ActivateLogTypes();
+
+				PlayerSettings.productName = preBuildProductName;
+				
+				
+				Debug.Log("XXX Playerbuild Result: " + report.summary.result+" output path "+CurrentProcess.OutputPath);
 				if (report.summary.result != BuildResult.Succeeded)
 				{
 					Cancel("Build failed with result: " + report.summary.result);
@@ -646,6 +666,9 @@ namespace UBS
 			if (pProcess.Pretend) return true;
 				
 			string error = "";
+			
+			var outputDir=GetOutputDirectory(pProcess);
+			Debug.Log($"check ouput path {outputDir}");
 			
 			
 			if(pProcess.OutputPath.Length == 0) {
