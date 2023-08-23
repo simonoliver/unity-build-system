@@ -111,6 +111,12 @@ namespace UBS {
         [field: FormerlySerializedAs("mName")]
         [field:SerializeField()]
         public string Name { get; set; } = "Build Process";
+        
+        /// <summary>
+        /// Allow the product name to be overridden for this target. Useful for demos etc
+        /// </summary>
+        [field:SerializeField()] public string ProductNameOverride { get; set; }
+        
 
         [field: FormerlySerializedAs("mOutputPath")]
         [field:SerializeField()]
