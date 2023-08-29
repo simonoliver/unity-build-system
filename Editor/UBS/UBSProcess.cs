@@ -7,6 +7,7 @@ using System.Linq;
 using UnityEditor.AddressableAssets;
 using UnityEditor.AddressableAssets.Build;
 using UnityEditor.AddressableAssets.Settings;
+using UnityEditor.Build;
 using UnityEditor.Build.Reporting;
 using UnityEngine.Serialization;
 
@@ -565,6 +566,16 @@ namespace UBS
 					PlayerSettings.SetScriptingBackend(buildTargetGroup, CurrentProcess.ScriptingBackend);
 				}
 
+				// IN some cases we want to clear active script defines from editor (rather than just add to them
+				// with extrascriptingDefines
+				var namedBuildTarget = NamedBuildTarget.FromBuildTargetGroup(buildTargetGroup);
+				var preBuildScriptingDefines = PlayerSettings.GetScriptingDefineSymbols(namedBuildTarget);
+
+				if (CurrentProcess.ClearPlayerScriptingDefines)
+				{
+					PlayerSettings.SetScriptingDefineSymbols(namedBuildTarget,"");
+				}
+
 				BuildPlayerOptions buildPlayerOptions = new BuildPlayerOptions
 				{
 					scenes = scenePaths.ToArray(),
@@ -578,10 +589,17 @@ namespace UBS
 
 				// Restore settings
 				PlayerSettings.productName = preBuildProductName;
-				// Allow override of build script process
+				
+				// Restore scripting backend
 				if (CurrentProcess.ScriptingBackend != preBuildScriptingBackend)
 				{
 					PlayerSettings.SetScriptingBackend(buildTargetGroup, preBuildScriptingBackend);
+				}
+
+				// Restore editor scripting symbols
+				if (CurrentProcess.ClearPlayerScriptingDefines)
+				{
+					PlayerSettings.SetScriptingDefineSymbols(namedBuildTarget, preBuildScriptingDefines);
 				}
 				
 				

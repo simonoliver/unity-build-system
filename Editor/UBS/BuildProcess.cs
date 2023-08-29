@@ -89,6 +89,9 @@ namespace UBS {
 			Selected = false;
 			ScriptingDefines = other.ScriptingDefines;
 			SceneAssets = new List<SceneAsset>( other.SceneAssets );
+			ScriptingBackend = other.ScriptingBackend;
+			ProductNameOverride = other.ProductNameOverride;
+			ClearPlayerScriptingDefines = other.ClearPlayerScriptingDefines;
 		}
 
 		#region data
@@ -151,6 +154,12 @@ namespace UBS {
         [field:SerializeField()]
         public List<SceneAsset> SceneAssets { get; private set;} = new List<SceneAsset>();
 
+        /// <summary>
+        /// Do we clear existing editor defines for this build
+        /// </summary>
+        [field: SerializeField] public bool ClearPlayerScriptingDefines { get; set; } = false;
+        
+        
         [field:SerializeField] 
         public List<string> ScriptingDefines { get; protected set; } = new();
         

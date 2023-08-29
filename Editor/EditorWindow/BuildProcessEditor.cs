@@ -365,6 +365,8 @@ namespace UBS
 				
 				_editedBuildProcess.ScriptingBackend = (ScriptingImplementation) EditorGUILayout.EnumPopup("Scripting Backend", _editedBuildProcess.ScriptingBackend);
 				
+				_editedBuildProcess.ClearPlayerScriptingDefines = EditorGUILayout.Toggle(new GUIContent("Clear Player Scripting Defines",
+					"Removes existing scripting defines in player "), _editedBuildProcess.ClearPlayerScriptingDefines);
 				
 				
 				DrawOutputPathSelector();
