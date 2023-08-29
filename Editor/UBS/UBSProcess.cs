@@ -522,6 +522,23 @@ namespace UBS
 			if (!CurrentProcess.Pretend)
 			{
 				var scenePaths = GetScenePaths();
+				
+				// IN some cases we want to clear active script defines from editor (rather than just add to them
+				// with extrascriptingDefines
+				var buildTargetGroup= BuildPipeline.GetBuildTargetGroup(CurrentProcess.Platform);
+				var namedBuildTarget = NamedBuildTarget.FromBuildTargetGroup(buildTargetGroup);
+				var preBuildScriptingDefines = PlayerSettings.GetScriptingDefineSymbols(namedBuildTarget);
+				Debug.Log($"preBuildScriptingDefines {preBuildScriptingDefines}");
+
+				var modifyDefines = CurrentProcess.ClearPlayerScriptingDefines |
+				                    CurrentProcess.ScriptingDefines.Count > 0;
+				if (modifyDefines)
+				{
+					var newDefines = new List<string>(preBuildScriptingDefines.Split(';'));
+					newDefines.AddRange(CurrentProcess.ScriptingDefines);
+					PlayerSettings.SetScriptingDefineSymbols(namedBuildTarget,newDefines.ToArray());
+					Debug.Log($"setting defines to {string.Join(',',newDefines)}");
+				}
 
 				// Does this project use addressables?
 				if (AddressableAssetSettingsDefaultObject.Settings != null)
@@ -556,33 +573,25 @@ namespace UBS
 					PlayerSettings.productName = CurrentProcess.ProductNameOverride;
 				}
 				
-				var buildTargetGroup= BuildPipeline.GetBuildTargetGroup(CurrentProcess.Platform);
+				
 				var preBuildScriptingBackend = PlayerSettings.GetScriptingBackend(buildTargetGroup);
 
 
-				// Allow override of build script process
+				// Allow override of build script plightcrocess
 				if (CurrentProcess.ScriptingBackend != preBuildScriptingBackend)
 				{
 					PlayerSettings.SetScriptingBackend(buildTargetGroup, CurrentProcess.ScriptingBackend);
 				}
 
-				// IN some cases we want to clear active script defines from editor (rather than just add to them
-				// with extrascriptingDefines
-				var namedBuildTarget = NamedBuildTarget.FromBuildTargetGroup(buildTargetGroup);
-				var preBuildScriptingDefines = PlayerSettings.GetScriptingDefineSymbols(namedBuildTarget);
-
-				if (CurrentProcess.ClearPlayerScriptingDefines)
-				{
-					PlayerSettings.SetScriptingDefineSymbols(namedBuildTarget,"");
-				}
+				
 
 				BuildPlayerOptions buildPlayerOptions = new BuildPlayerOptions
 				{
 					scenes = scenePaths.ToArray(),
 					locationPathName = CurrentProcess.OutputPath,
 					target = CurrentProcess.Platform,
-					options = bo,
-					extraScriptingDefines = CurrentProcess.ScriptingDefines.ToArray()
+					options = bo
+					//extraScriptingDefines = CurrentProcess.ScriptingDefines.ToArray()
 				};
 				BuildReport report = BuildPipeline.BuildPlayer(buildPlayerOptions);
 				//_collection.ActivateLogTypes();
@@ -597,13 +606,13 @@ namespace UBS
 				}
 
 				// Restore editor scripting symbols
-				if (CurrentProcess.ClearPlayerScriptingDefines)
+				if (modifyDefines)
 				{
 					PlayerSettings.SetScriptingDefineSymbols(namedBuildTarget, preBuildScriptingDefines);
 				}
 				
 				
-				Debug.Log("XXX Playerbuild Result: " + report.summary.result+" output path "+CurrentProcess.OutputPath);
+				Debug.Log($"XXX Playerbuild Result: {report.summary.result}  output path {CurrentProcess.OutputPath} defines {preBuildScriptingDefines}");
 				if (report.summary.result != BuildResult.Succeeded)
 				{
 					Cancel("Build failed with result: " + report.summary.result);
