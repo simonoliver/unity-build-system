@@ -547,11 +547,22 @@ namespace UBS
 				Debug.Log($"XXXX Building to path {CurrentProcess.OutputPath} - name {CurrentProcess.Name}");
 				// Cache prebuild product name in case of override
 				var preBuildProductName = PlayerSettings.productName;
+				
 
 				// Allow override if string is not empty
 				if (!string.IsNullOrEmpty(CurrentProcess.ProductNameOverride))
 				{
 					PlayerSettings.productName = CurrentProcess.ProductNameOverride;
+				}
+				
+				var buildTargetGroup= BuildPipeline.GetBuildTargetGroup(CurrentProcess.Platform);
+				var preBuildScriptingBackend = PlayerSettings.GetScriptingBackend(buildTargetGroup);
+
+
+				// Allow override of build script process
+				if (CurrentProcess.ScriptingBackend != preBuildScriptingBackend)
+				{
+					PlayerSettings.SetScriptingBackend(buildTargetGroup, CurrentProcess.ScriptingBackend);
 				}
 
 				BuildPlayerOptions buildPlayerOptions = new BuildPlayerOptions
@@ -565,7 +576,13 @@ namespace UBS
 				BuildReport report = BuildPipeline.BuildPlayer(buildPlayerOptions);
 				//_collection.ActivateLogTypes();
 
+				// Restore settings
 				PlayerSettings.productName = preBuildProductName;
+				// Allow override of build script process
+				if (CurrentProcess.ScriptingBackend != preBuildScriptingBackend)
+				{
+					PlayerSettings.SetScriptingBackend(buildTargetGroup, preBuildScriptingBackend);
+				}
 				
 				
 				Debug.Log("XXX Playerbuild Result: " + report.summary.result+" output path "+CurrentProcess.OutputPath);

@@ -363,6 +363,10 @@ namespace UBS
 				
 				_editedBuildProcess.ProductNameOverride = EditorGUILayout.TextField("Product Name Override", _editedBuildProcess.ProductNameOverride);
 				
+				_editedBuildProcess.ScriptingBackend = (ScriptingImplementation) EditorGUILayout.EnumPopup("Scripting Backend", _editedBuildProcess.ScriptingBackend);
+				
+				
+				
 				DrawOutputPathSelector();
 				_editedBuildProcess.UseEditorScenes = EditorGUILayout.Toggle(
 					new GUIContent("Use Scenes from Editor",

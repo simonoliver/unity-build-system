@@ -116,6 +116,11 @@ namespace UBS {
         /// Allow the product name to be overridden for this target. Useful for demos etc
         /// </summary>
         [field:SerializeField()] public string ProductNameOverride { get; set; }
+
+        /// <summary>
+        /// Allow the scripting backend to be overridden for this target
+        /// </summary>
+        [field: SerializeField()] public ScriptingImplementation ScriptingBackend=ScriptingImplementation.IL2CPP;
         
 
         [field: FormerlySerializedAs("mOutputPath")]
