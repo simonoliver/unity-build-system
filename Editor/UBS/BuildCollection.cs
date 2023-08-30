@@ -32,6 +32,7 @@ namespace UBS
 			}
 		}
 
+        [NonSerialized]
 		public BuildVersion version = null;
 		public string versionCode = "1";
 		public bool cleanBuild = false;
