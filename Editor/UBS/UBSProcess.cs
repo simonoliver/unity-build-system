@@ -7,6 +7,7 @@ using System.Linq;
 using UnityEditor.AddressableAssets;
 using UnityEditor.AddressableAssets.Build;
 using UnityEditor.AddressableAssets.Settings;
+using UnityEditor.AddressableAssets.Settings.GroupSchemas;
 using UnityEditor.Build;
 using UnityEditor.Build.Reporting;
 using UnityEngine.Serialization;
@@ -540,6 +541,16 @@ namespace UBS
 					Debug.Log($"setting defines to {string.Join(',',newDefines)}");
 				}
 
+				// Cache status for all included addressable groups pre-build
+				var currentIncludedAddressables = new Dictionary<AddressableAssetGroup, bool>();
+				var allGroups = AddressableAssetSettingsDefaultObject.Settings.groups;
+				foreach (var groupEntry in allGroups)
+				{
+					var schema = groupEntry.GetSchema<BundledAssetGroupSchema>();
+					if (schema != null) currentIncludedAddressables[groupEntry] = schema.IncludeInBuild;
+				}
+
+
 				// Does this project use addressables?
 				if (AddressableAssetSettingsDefaultObject.Settings != null)
 				{
@@ -609,6 +620,13 @@ namespace UBS
 				if (modifyDefines)
 				{
 					PlayerSettings.SetScriptingDefineSymbols(namedBuildTarget, preBuildScriptingDefines);
+				}
+				
+				// Restore addressables state to pre-build state
+				foreach (var groupEntryKeyPair in currentIncludedAddressables)
+				{
+					var schema = groupEntryKeyPair.Key.GetSchema<BundledAssetGroupSchema>();
+					if (schema != null) schema.IncludeInBuild = groupEntryKeyPair.Value;
 				}
 				
 				
